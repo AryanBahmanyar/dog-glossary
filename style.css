@@ -1,0 +1,44 @@
+:root {
+    --blue: #007BFF;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#inputs {
+    margin: 1em;
+}
+
+input {
+    border: var(--blue) 2px solid;
+    border-radius: 5px;
+    padding: calc(1em - 2px);
+    outline: none;
+}
+
+button {
+    background-color: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 1em;
+}
+
+#content {
+    display: flex;
+    padding: 2em;
+    margin: 2em;
+    background-color: #CCE5FF;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+img {
+    border: var(--blue) 4px solid;
+    border-radius: 10px;
+    max-width: 90vw;
+    height: auto;
+}

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dog Glossary</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Dog Glossary</h1>
+    <div id="inputs">
+        <button id="button-random-dog">Show Random Dog</button>
+        <input type="text" id="input-breed" placeholder="Enter a breed">
+        <button id="button-show-breed">Show Breed</button>
+        <button id="button-show-sub-breed">Show Sub-Breed</button>
+        <button id="button-show-all">Show All Breeds</button>
+    </div>
+    <div id="content"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const randButton = document.getElementById('button-random-dog');
+            const breedInput = document.getElementById('input-breed');
+            const breedButton = document.getElementById('button-show-breed');
+            const subBreedButton = document.getElementById('button-show-sub-breed');
+            const showAllButton = document.getElementById('button-show-all');
+            const content = document.getElementById('content');
+            const image = document.createElement('img');
+            const list = document.createElement('ol');
+            const breedError = document.createElement('p');
+            const subBreedError = document.createElement('p');
+            let breeds, subBreeds;
+
+            image.alt = 'Dog';
+            breedError.id = 'error-breed';
+            breedError.textContent = 'Breed not found!';
+            subBreedError.id = 'error-sub-breed';
+            subBreedError.textContent = 'No sub-breeds found!';
+
+            (async function() {
+                try {
+                    const response = await fetch('https://dog.ceo/api/breeds/list/all');
+                    const data = await response.json();
+                    breeds = Object.keys(data.message);
+                    subBreeds = Object.values(data.message);
+                } catch (e) {
+                    console.log(e);
+                }
+            })();
+
+            randButton.addEventListener('click', async function() {
+                await getImage('https://dog.ceo/api/breeds/image/random');
+            });
+            breedInput.addEventListener('keypress', async function(e) {
+                if (e.code === 'Enter')
+                    await getImageByBreed();
+            });
+            breedButton.addEventListener('click', getImageByBreed);
+            subBreedButton.addEventListener('click', showSubBreedList);
+            showAllButton.addEventListener('click', showFullList)
+            async function getImage(url) {
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (response.status === 404)
+                        setContent(breedError);
+                    else {
+                        image.src = data.message;
+                        setContent(image);
+                    }
+                } catch (e) {
+                    console.log(e)
+                }
+            }
+            async function getImageByBreed() {
+                await getImage(`https://dog.ceo/api/breed/${getInput()}/images/random`);
+            }
+            async function showSubBreedList() {
+                try {
+                    let i = breeds.indexOf(getInput());
+                    list.innerHTML = "";
+
+                    if (i === -1) {
+                        setContent(breedError);
+                        return;
+                    }
+                    if (subBreeds[i].length === 0) {
+                        setContent(subBreedError);
+                        return;
+                    }
+                    for (let subBreed of subBreeds[i]) {
+                        let item = document.createElement('li');
+                        item.textContent = subBreed;
+                        list.appendChild(item);
+                    }
+                    setContent(list);
+                } catch (e) {
+                    console.log(e)
+                }
+            }
+            function showFullList() {
+                list.innerHTML = "";
+
+                for (let i = 0; i < breeds.length; i++) {
+                    let breed = document.createElement('li');
+                    breed.textContent = breeds[i];
+
+                    if (subBreeds[i].length > 0) {
+                        let subList = document.createElement('ul');
+
+                        for (let j = 0; j < subBreeds[i].length; j++) {
+                            let subBreed = document.createElement('li');
+                            subBreed.textContent = subBreeds[i][j];
+                            subList.appendChild(subBreed);
+                        }
+                        breed.appendChild(subList);
+                    }
+                    list.appendChild(breed);
+                }
+                setContent(list);
+            }
+            function getInput() {
+                return breedInput.value.toLowerCase();
+            }
+            function setContent(element) {
+                if (content.children.length === 0)
+                    content.append(element);
+                else
+                    content.replaceChild(element, content.children[0]);
+            }
+        });
+    </script>
+</body>
+</html>
